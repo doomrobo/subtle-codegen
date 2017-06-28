@@ -1,87 +1,29 @@
-extern crate subtle;
-#[macro_use]
-extern crate subtle_codegen;
+extern crate compiletest_rs as compiletest;
 
-use subtle::CTEq;
+use std::env;
+use std::path::PathBuf;
 
-#[derive(Copy, Clone, CTEq)]
-struct Foo {
-    a: u8,
-    b: u8,
-}
+fn run_mode(mode: &'static str) {
+    let mut config = compiletest::default_config();
+    let cfg_mode = mode.parse().ok().expect("Invalid mode");
 
-#[derive(Copy, Clone, CTEq)]
-struct Bar (u8, u8);
+    config.mode = cfg_mode;
+    config.src_base = PathBuf::from(format!("tests/{}", mode));
 
-#[derive(Copy, Clone, CTEq)]
-struct Baz<'a, T: CTEq+Sized> {
-    a: Foo,
-    b: Bar,
-    c: &'a [i16],
-    d: T,
-}
+    // Add our dependencies to the library search path
+    let dyld_paths = env::var("DYLD_LIBRARY_PATH").unwrap();
 
-#[test]
-fn test_struct_eq() {
-    let f = Foo { a: 10, b: 11 };
-    let g = f.clone();
+    // This is hacky. We can only add one search path, so pick the one that has ends with "/deps"
+    for path in dyld_paths.split(":").map(PathBuf::from) {
+        if path.ends_with("deps") {
+            config.build_base = path;
+        }
+    }
 
-    assert_eq!(f.ct_eq(&g), 1u8);
+    compiletest::run_tests(&config);
 }
 
 #[test]
-fn test_struct_neq() {
-    let f = Foo { a: 10, b: 11 };
-    let g = Foo { a: 10, b: 12 };
-
-    assert_eq!(f.ct_eq(&g), 0u8);
-}
-
-#[test]
-fn test_tuple_eq() {
-    let f = Bar(10, 11);
-    let g = f.clone();
-
-    assert_eq!(f.ct_eq(&g), 1u8);
-}
-
-#[test]
-fn test_tuple_neq() {
-    let f = Bar(10, 11);
-    let g = Bar(10, 12);
-
-    assert_eq!(f.ct_eq(&g), 0u8);
-}
-
-#[test]
-fn test_nested_eq() {
-    let f = Baz {
-        a: Foo {
-            a: 10,
-            b: 20,
-        },
-        b: Bar(30, 40),
-        c: &[1, 2, 3, 4],
-        d: 99u8,
-    };
-    let g = f.clone();
-
-    assert_eq!(f.ct_eq(&g), 1u8);
-}
-
-#[test]
-fn test_nested_neq() {
-    let f = Baz {
-        a: Foo {
-            a: 10,
-            b: 20,
-        },
-        b: Bar(30, 40),
-        c: &[1, 2, 3, 4],
-        d: 99u8,
-    };
-    let mut g = f.clone();
-    g.d = 98u8;
-
-    assert_eq!(f.ct_eq(&g), 0u8);
+fn compile_test() {
+    run_mode("compile-fail");
 }

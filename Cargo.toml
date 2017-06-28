@@ -11,5 +11,8 @@ syn = "0.11"
 git = "https://github.com/doomrobo/subtle.git"
 branch = "ct-eq-everything"
 
+[dev-dependencies]
+compiletest_rs = "0.2"
+
 [lib]
 proc-macro = true
