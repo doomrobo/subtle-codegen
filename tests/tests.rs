@@ -12,13 +12,13 @@ fn run_mode(mode: &'static str) {
 
     // Add our dependencies to the library search path
     let dyld_paths = env::var("DYLD_LIBRARY_PATH").unwrap();
+    let mut compiler_flags = String::new();
 
-    // This is hacky. We can only add one search path, so pick the one that has ends with "/deps"
-    for path in dyld_paths.split(":").map(PathBuf::from) {
-        if path.ends_with("deps") {
-            config.build_base = path;
-        }
+    for p in dyld_paths.split(":") {
+        compiler_flags += &*format!(" -L {}", p);
     }
+
+    config.target_rustcflags = Some(compiler_flags);
 
     compiletest::run_tests(&config);
 }
