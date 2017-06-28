@@ -14,10 +14,11 @@ struct Foo {
 struct Bar (u8, u8);
 
 #[derive(Copy, Clone, CTEq)]
-struct Baz {
+struct Baz<'a, T: CTEq+Sized> {
     a: Foo,
     b: Bar,
-    c: [i16; 4],
+    c: &'a [i16],
+    d: T,
 }
 
 #[test]
@@ -60,7 +61,8 @@ fn test_nested_eq() {
             b: 20,
         },
         b: Bar(30, 40),
-        c: [1, 2, 3, 4],
+        c: &[1, 2, 3, 4],
+        d: 99u8,
     };
     let g = f.clone();
 
@@ -75,10 +77,11 @@ fn test_nested_neq() {
             b: 20,
         },
         b: Bar(30, 40),
-        c: [1, 2, 3, 4],
+        c: &[1, 2, 3, 4],
+        d: 99u8,
     };
     let mut g = f.clone();
-    g.c[0] = 2;
+    g.d = 98u8;
 
     assert_eq!(f.ct_eq(&g), 0u8);
 }

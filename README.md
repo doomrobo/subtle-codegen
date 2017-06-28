@@ -27,5 +27,4 @@ fn main() {
 
 ## TODO
 
- * Make this work for structs with type and lifetime parameters
  * Check that this implementation is actually constant-time
