@@ -6,7 +6,7 @@ extern crate quote;
 
 use proc_macro::TokenStream;
 
-#[proc_macro_derive(CTEq)]
+#[proc_macro_derive(ConstantTimeEq)]
 pub fn derive_cteq(input: TokenStream) -> TokenStream {
     let s = input.to_string();
 
@@ -37,7 +37,7 @@ pub fn derive_cteq(input: TokenStream) -> TokenStream {
         // to force every variant to take as long as the longest-running variant, but that's pretty
         // unlikely.
         syn::Body::Enum(_) =>
-            panic!("CTEq can only be derived on struct, but {} is an enum", typename),
+            panic!("ConstantTimeEq can only be derived on struct, but {} is an enum", typename),
     }
 }
 
@@ -45,10 +45,10 @@ fn impl_cteq_unit(typename: syn::Ident, generics: syn::Generics) -> quote::Token
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     quote! {
         // Unit structs are always equal
-        impl #impl_generics CTEq for #typename #ty_generics #where_clause {
+        impl #impl_generics ConstantTimeEq for #typename #ty_generics #where_clause {
             #[inline(always)]
-            fn ct_eq(&self, other: &#typename #ty_generics) -> subtle::Mask {
-                1u8
+            fn ct_eq(&self, other: &#typename #ty_generics) -> subtle::Choice {
+                subtle::Choice::from(1u8)
             }
         }
     }
@@ -71,12 +71,12 @@ fn impl_cteq_fields(typename: syn::Ident, fields: Vec<syn::Field>, generics: syn
     let membernames2 = membernames1.clone();
 
     quote! {
-        impl #impl_generics CTEq for #typename #ty_generics #where_clause {
+        impl #impl_generics ConstantTimeEq for #typename #ty_generics #where_clause {
             #[inline(always)]
-            fn ct_eq(&self, other: &#typename #ty_generics) -> subtle::Mask {
+            fn ct_eq(&self, other: &#typename #ty_generics) -> subtle::Choice {
                 // Go through each member, ANDing together their equality results
-                let mut x = 1u8;
-                #(x &= self.#membernames1.ct_eq(&other.#membernames2);)*
+                let mut x = subtle::Choice::from(1u8);
+                #(x = x & self.#membernames1.ct_eq(&other.#membernames2);)*
                 x
             }
         }

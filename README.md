@@ -1,6 +1,6 @@
 # subtle-codegen
 Procedural macros for the Rust `subtle` crate. All that this has at the moment is a custom derive
-for the `subtle::CTEq` trait.
+for the `subtle::ConstantTimeEq` trait.
 
 ## Example
 
@@ -9,9 +9,9 @@ extern crate subtle;
 #[macro_use]
 extern crate subtle_codegen;
 
-use subtle::CTEq;
+use subtle::ConstantTimeEq;
 
-#[derive(Copy, Clone, CTEq)]
+#[derive(Copy, Clone, ConstantTimeEq)]
 struct Foo {
     a: u8,
     b: u8,
