@@ -3,3 +3,10 @@ rust:
   - stable
   - beta
   - nightly
+
+notifications:
+  email:
+    recipients:
+      - micro@fastmail.com
+    on_success: change
+    on_failure: change
