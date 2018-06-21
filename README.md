@@ -33,9 +33,7 @@ fn main() {
 
 ## Testing
 
-To test, simply run `cargo test`. Note that this will require nightly.
-
-If you get something like
+To test, simply run `cargo test`. If you get something like
 
 ```
 error: tests/compile-fail/enum.rs:3: unexpected error: '3:1: 3:29: multiple matching crates for `subtle_codegen` [E0464]
