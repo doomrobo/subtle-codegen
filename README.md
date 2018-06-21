@@ -1,4 +1,6 @@
 # subtle-codegen
+[![Build Status](https://travis-ci.org/doomrobo/subtle-codegen.svg?branch=master)](https://travis-ci.org/doomrobo/subtle-codegen)
+
 Procedural macros for the Rust [`subtle`](https://doc.dalek.rs/subtle/) crate. All that this has at
 the moment is a custom derive for the `subtle::ConstantTimeEq` trait.
 
